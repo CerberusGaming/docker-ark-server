@@ -56,7 +56,6 @@ if [[ ! "$(id -u "${STEAM_USER}")" -eq "${STEAM_UID}" ]] || [[ ! "$(id -g "${STE
   sudo groupmod -o -g "${STEAM_GID}" "${STEAM_GROUP}"
 fi
 
-
 echo "_______________________________________"
 echo ""
 echo "# Ark Server - $(date)"
@@ -127,9 +126,9 @@ if [[ -n "${GAME_MOD_IDS}" ]]; then
 fi
 
 args=("$*")
-args=('--arkopt,RCONPort=${RCON_PORT}' "${args[@]}")
-args=('--arkopt,Port=${GAME_CLIENT_PORT}' "${args[@]}")
-args=('--arkopt,QueryPort=${SERVER_LIST_PORT}' "${args[@]}")
+args=("--arkopt,RCONPort=${RCON_PORT}" "${args[@]}")
+args=("--arkopt,Port=${GAME_CLIENT_PORT}" "${args[@]}")
+args=("--arkopt,QueryPort=${SERVER_LIST_PORT}" "${args[@]}")
 args=('--arkopt,-servergamelog' "${args[@]}")
 
 if [[ "${ENABLE_CROSSPLAY}" == "true" ]]; then
@@ -139,7 +138,7 @@ if [[ "${DISABLE_BATTLEYE}" == "true" ]]; then
   args=('--arkopt,-NoBattlEye' "${args[@]}")
 fi
 if [[ -n "${CLUSTER_ID}" ]]; then
-  args=('--arkopt,-clusterid=${CLUSTER_ID}' '--arkopt,-NoTransferFromFiltering' "${args[@]}")
+  args=("--arkopt,-clusterid=${CLUSTER_ID}" '--arkopt,-NoTransferFromFiltering' "${args[@]}")
 fi
 
 exec ${ARKMANAGER} run --verbose ${args[@]}

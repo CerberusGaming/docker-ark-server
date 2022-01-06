@@ -129,11 +129,19 @@ if [[ -n "${GAME_MOD_IDS}" ]]; then
 fi
 
 args=("$*")
+args=('--arkopt,RCONPort=$(RCON_PORT)' "${args[@]}")
+args=('--arkopt,Port=$(GAME_CLIENT_PORT)' "${args[@]}")
+args=('--arkopt,QueryPort=$(SERVER_LIST_PORT)' "${args[@]}")
+args=('--arkopt,-servergamelog' "${args[@]}")
+
 if [[ "${ENABLE_CROSSPLAY}" == "true" ]]; then
   args=('--arkopt,-crossplay' "${args[@]}")
 fi
 if [[ "${DISABLE_BATTLEYE}" == "true" ]]; then
   args=('--arkopt,-NoBattlEye' "${args[@]}")
+fi
+if [[ -n "${CLUSTER_ID}" ]]; then
+  args=('--arkopt,-clusterid=${CLUSTER_ID}' '--arkopt,-NoTransferFromFiltering' "${args[@]}")
 fi
 
 exec ${ARKMANAGER} run --verbose ${args[@]}

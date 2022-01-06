@@ -2,7 +2,7 @@
 
 set -e
 
-[[ -z "${DEBUG}" ]] || [[ "${DEBUG,,}" = "false" ]] || [[ "${DEBUG,,}" = "0" ]] || set -x
+[[ "${DEBUG,,}" = "false" ]] || [[ "${DEBUG,,}" = "0" ]] || [[ -z "${DEBUG}" ]] || set -x
 
 function ensure_rights() {
   TARGET="${ARK_SERVER_VOLUME} ${STEAM_HOME}"
@@ -115,7 +115,11 @@ if [[ -n "${GAME_MOD_IDS}" ]]; then
 
     if [[ -d "${ARK_SERVER_VOLUME}/server/ShooterGame/Content/Mods/${MOD_ID}" ]]; then
       echo "...already installed"
-      [[ -n "${FORCE_MOD_UPDATE}" ]] || [[ "${FORCE_MOD_UPDATE,,}" = "true" ]] || [[ "${FORCE_MOD_UPDATE,,}" = "1" ]] || continue
+      [[ "${FORCE_MOD_UPDATE,,}" = "false" ]] || [[ "${FORCE_MOD_UPDATE,,}" = "0" ]] || [[ -n "${FORCE_MOD_UPDATE}" ]]; then
+        echo "Forcing install."
+      else
+        continue
+      fi
     fi
 
     ${ARKMANAGER} installmod "${MOD_ID}" --verbose

@@ -56,8 +56,6 @@ if [[ ! "$(id -u "${STEAM_USER}")" -eq "${STEAM_UID}" ]] || [[ ! "$(id -g "${STE
   sudo groupmod -o -g "${STEAM_GID}" "${STEAM_GROUP}"
 fi
 
-# Always ensure correct rights on home and volume folder
-ensure_rights ""
 
 echo "_______________________________________"
 echo ""

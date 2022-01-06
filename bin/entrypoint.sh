@@ -115,7 +115,7 @@ if [[ -n "${GAME_MOD_IDS}" ]]; then
 
     if [[ -d "${ARK_SERVER_VOLUME}/server/ShooterGame/Content/Mods/${MOD_ID}" ]]; then
       echo "...already installed"
-      continue
+      [[ -z "${FORCE_MOD_UPDATE}" ]] || [[ "${FORCE_MOD_UPDATE,,}" = "false" ]] || [[ "${FORCE_MOD_UPDATE,,}" = "0" ]] || continue
     fi
 
     ${ARKMANAGER} installmod "${MOD_ID}" --verbose

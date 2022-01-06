@@ -13,6 +13,7 @@ ENV         LANG="en_US.UTF-8" \
             ADMIN_PASSWORD="Th155houldD3f1n3tlyB3Chang3d" \
             MAX_PLAYERS="20" \
             GAME_MOD_IDS="" \
+            FORCE_MOD_UPDATE="false" \
             UPDATE_ON_START="false" \
             BACKUP_ON_STOP="false" \
             PRE_UPDATE_BACKUP="true" \

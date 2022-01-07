@@ -50,7 +50,7 @@ function copy_missing_file() {
 }
 
 ########################################################################################################################
-sudo chown -R "${STEAM_USER}":"${STEAM_GROUP}" ${ARK_SERVER_VOLUME}
+sudo chown "${STEAM_USER}":"${STEAM_GROUP}" ${ARK_SERVER_VOLUME}
 
 if [[ ! "$(id -u "${STEAM_USER}")" -eq "${STEAM_UID}" ]] || [[ ! "$(id -g "${STEAM_GROUP}")" -eq "${STEAM_GID}" ]]; then
   sudo usermod -o -u "${STEAM_UID}" "${STEAM_USER}"

@@ -2,7 +2,7 @@
 
 set -e
 
-[[ -z "${DEBUG}" ]] || [[ "${DEBUG,,}" = "false" ]] || [[ "${DEBUG,,}" = "0" ]] || set -x
+[[ "${DEBUG,,}" = "false" ]] || [[ "${DEBUG,,}" = "0" ]] || [[ -z "${DEBUG}" ]] || set -x
 
 function ensure_rights() {
   TARGET="${ARK_SERVER_VOLUME} ${STEAM_HOME}"
@@ -11,7 +11,7 @@ function ensure_rights() {
   fi
 
   echo "...ensuring rights on ${TARGET}"
-  sudo chown -fR "${STEAM_USER}":"${STEAM_GROUP}" ${TARGET}
+  sudo chown -R "${STEAM_USER}":"${STEAM_GROUP}" ${TARGET}
 }
 
 function may_update() {
@@ -49,13 +49,13 @@ function copy_missing_file() {
   ensure_rights ${DESTINATION}
 }
 
+########################################################################################################################
+sudo chown -R "${STEAM_USER}":"${STEAM_GROUP}" ${ARK_SERVER_VOLUME}
+
 if [[ ! "$(id -u "${STEAM_USER}")" -eq "${STEAM_UID}" ]] || [[ ! "$(id -g "${STEAM_GROUP}")" -eq "${STEAM_GID}" ]]; then
   sudo usermod -o -u "${STEAM_UID}" "${STEAM_USER}"
   sudo groupmod -o -g "${STEAM_GID}" "${STEAM_GROUP}"
 fi
-
-# Always ensure correct rights on home and volume folder
-ensure_rights ""
 
 echo "_______________________________________"
 echo ""
@@ -75,7 +75,6 @@ cd "${ARK_SERVER_VOLUME}"
 echo "Setting up folder and file structure..."
 create_missing_dir "${ARK_SERVER_VOLUME}/log" "${ARK_SERVER_VOLUME}/backup" "${ARK_SERVER_VOLUME}/staging"
 
-
 echo "Setting up Arkmanager..."
 # setup arkmanager directories
 if [[ ! -d ${ARK_TOOLS_DIR} ]]; then
@@ -91,13 +90,8 @@ sudo ln -s "${ARK_TOOLS_DIR}" "/etc/arkmanager"
 # copy from template to server volume
 copy_missing_file "${TEMPLATE_DIRECTORY}/arkmanager.cfg" "${ARK_TOOLS_DIR}/arkmanager.cfg"
 copy_missing_file "${TEMPLATE_DIRECTORY}/arkmanager-user.cfg" "${ARK_TOOLS_DIR}/instances/main.cfg"
-copy_missing_file "${TEMPLATE_DIRECTORY}/crontab" "${ARK_SERVER_VOLUME}/crontab"
 
-[[ -L "${ARK_SERVER_VOLUME}/Game.ini" ]] ||
-  ln -s ./server/ShooterGame/Saved/Config/LinuxServer/Game.ini Game.ini
-[[ -L "${ARK_SERVER_VOLUME}/GameUserSettings.ini" ]] ||
-  ln -s ./server/ShooterGame/Saved/Config/LinuxServer/GameUserSettings.ini GameUserSettings.ini
-
+# Install ark
 if [[ ! -d ${ARK_SERVER_VOLUME}/server ]] || [[ ! -f ${ARK_SERVER_VOLUME}/server/version.txt ]]; then
   echo "No game files found. Installing..."
 
@@ -114,16 +108,6 @@ else
   may_update
 fi
 
-ACTIVE_CRONS="$(grep -v "^#" "${ARK_SERVER_VOLUME}/crontab" 2>/dev/null | wc -l)"
-if [[ ${ACTIVE_CRONS} -gt 0 ]]; then
-  echo "Loading crontab..."
-  crontab "${ARK_SERVER_VOLUME}/crontab"
-  sudo service cron start
-  echo "...done"
-else
-  echo "No crontab set"
-fi
-
 if [[ -n "${GAME_MOD_IDS}" ]]; then
   echo "Installing mods: '${GAME_MOD_IDS}' ..."
 
@@ -132,14 +116,19 @@ if [[ -n "${GAME_MOD_IDS}" ]]; then
 
     if [[ -d "${ARK_SERVER_VOLUME}/server/ShooterGame/Content/Mods/${MOD_ID}" ]]; then
       echo "...already installed"
-      continue
+      if [[ "${FORCE_MOD_UPDATE,,}" = "true" ]] || [[ "${FORCE_MOD_UPDATE,,}" = "1" ]]; then
+        echo "Forcing install."
+      else
+        continue
+      fi
     fi
 
     ${ARKMANAGER} installmod "${MOD_ID}" --verbose
     echo "...done"
   done
-fi
 
+  ${ARKMANAGER} checkmodupdate
+fi
 
 args=("$*")
 args=("--arkopt,RCONPort=${RCON_PORT}" "${args[@]}")

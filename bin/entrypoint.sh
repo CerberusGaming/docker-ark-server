@@ -52,6 +52,7 @@ function copy_missing_file() {
 ########################################################################################################################
 sudo chown "${STEAM_USER}":"${STEAM_GROUP}" ${ARK_SERVER_VOLUME}
 
+
 if [[ ! "$(id -u "${STEAM_USER}")" -eq "${STEAM_UID}" ]] || [[ ! "$(id -g "${STEAM_GROUP}")" -eq "${STEAM_GID}" ]]; then
   sudo usermod -o -u "${STEAM_UID}" "${STEAM_USER}"
   sudo groupmod -o -g "${STEAM_GID}" "${STEAM_GROUP}"
@@ -145,5 +146,7 @@ fi
 if [[ -n "${CLUSTER_ID}" ]]; then
   args=("--arkopt,-clusterid=${CLUSTER_ID}" '--arkopt,-NoTransferFromFiltering' "${args[@]}")
 fi
+
+sudo chown "${STEAM_USER}":"${STEAM_GROUP}" ${ARK_SERVER_VOLUME}/server/ShooterGame/Saved/SavedArks
 
 exec ${ARKMANAGER} run --verbose ${args[@]}
